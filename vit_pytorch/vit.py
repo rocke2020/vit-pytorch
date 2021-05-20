@@ -115,9 +115,11 @@ class ViT(nn.Module):
 
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
+        # TODO maybe no need :(n+1), just self.pos_embedding is OK.
         x += self.pos_embedding[:, :(n + 1)]
         x = self.dropout(x)
 
+        # x.shape, b, n+1, d
         x = self.transformer(x)
 
         x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0]
