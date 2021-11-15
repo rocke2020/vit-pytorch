@@ -78,7 +78,8 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
-    def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
+    def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, 
+        pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
@@ -140,7 +141,10 @@ class AttentionWithMask(nn.Module):
         )
 
     def forward(self, x, mask = None):
-        b, n, _, h = *x.shape, self.heads # n=50,h=8
+        # n is the patch_num + 1, patch_num = (img_size/patch_size)**2.
+        # just assume img_size 224, patch_size 32, 224/32=7 it is 7*7+1=50 here.
+        # yolo-v1 also use patch num 7*7.
+        b, n, _, h = *x.shape, self.heads # n=50,h=8, 
         # self.to_qkv(x)得到的尺寸为[b,50,64x8x3],然后chunk成3份
         # 也就是说，qkv是一个三元tuple,每一份都是[b,50,64x8]的大小
         qkv = self.to_qkv(x).chunk(3, dim = -1)
